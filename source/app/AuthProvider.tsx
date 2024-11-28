@@ -50,12 +50,16 @@ export function AuthProvider({ children }: PropsWithChildren) {
   };
 
   const { userData, refetch, isLoading } = useCheckAuth(!isAuth, token);
-  console.log(userData, token)
   useEffect(() => {
     if (token) refetch();
   }, [token]);
   useEffect(() => {
-    if (userData && isAuth) router.push("/auth");
+    if (userData && isAuth) {
+      if (userData.courses.length === 0) {
+        return router.push("/auth/start_test")
+      }
+      router.push("/auth");
+    }
   }, [userData, isAuth, token]);
 
   // if ((isLoading || !userData) && !isAuth) return <Loading />;

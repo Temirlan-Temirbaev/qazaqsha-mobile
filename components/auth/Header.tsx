@@ -6,7 +6,7 @@ export default function Header() {
 
   return (
     <View style={styles.header}>
-      <Text style={styles.logo}>Qazaqsha</Text>
+      <Text style={styles.logo}>QazaQsha</Text>
       <View style={styles.buttonGroup}>
         <TouchableOpacity
           style={[styles.button, language === 'ru' && styles.activeButton]}
@@ -42,6 +42,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#6c38cc',
+    fontFamily: "IBMPlexSans-Bold"
   },
   buttonGroup: {
     flexDirection: 'row',
@@ -61,6 +62,7 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 14,
     color: '#333',
+    fontFamily: "IBMPlexSans-SemiBold"
   },
   activeButtonText: {
     color: '#fff',
