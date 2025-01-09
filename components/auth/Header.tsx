@@ -1,24 +1,24 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useState } from 'react';
+import {useContext, useState} from 'react';
+import {LanguageContext} from "@/source/app/LanguageProvider";
 
 export default function Header() {
-  const [language, setLanguage] = useState('ru');
-
+  const { lang, changeLang} = useContext(LanguageContext)
   return (
     <View style={styles.header}>
       <Text style={styles.logo}>QazaQsha</Text>
       <View style={styles.buttonGroup}>
         <TouchableOpacity
-          style={[styles.button, language === 'ru' && styles.activeButton]}
-          onPress={() => setLanguage('ru')}
+          style={[styles.button, lang === 'ru' && styles.activeButton]}
+          onPress={() => changeLang('ru')}
         >
-          <Text style={[styles.buttonText, language === 'ru' && styles.activeButtonText]}>Русский</Text>
+          <Text style={[styles.buttonText, lang === 'ru' && styles.activeButtonText]}>Русский</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.button, language === 'kk' && styles.activeButton]}
-          onPress={() => setLanguage('kk')}
+          style={[styles.button, lang === 'kk' && styles.activeButton]}
+          onPress={() => changeLang('kk')}
         >
-          <Text style={[styles.buttonText, language === 'kk' && styles.activeButtonText]}>Қазақша</Text>
+          <Text style={[styles.buttonText, lang === 'kk' && styles.activeButtonText]}>Қазақша</Text>
         </TouchableOpacity>
       </View>
     </View>

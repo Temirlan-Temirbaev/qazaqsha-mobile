@@ -186,9 +186,10 @@ class ToastManager extends Component<ToastManagerProps, ToastManagerState> {
     };
 
     const barColors = {
-      success: "#3B46E0",
+      success: "#6c38cc",
       error: "#EB5555",
     };
+
 
     return (
       <Modal
@@ -219,7 +220,7 @@ class ToastManager extends Component<ToastManagerProps, ToastManagerState> {
             styles.mainContainer,
             {
               width,
-              height,
+              height: height,
               backgroundColor: Colors[theme].back,
               top: this.position(),
               ...style,
@@ -230,7 +231,6 @@ class ToastManager extends Component<ToastManagerProps, ToastManagerState> {
           <View style={styles.content}>
             <SvgXml xml={icons[icon]} className="mr-2" />
             <Text
-              className="!text-[16px]"
               style={[
                 styles.textStyle,
                 { color: Colors[theme].text, ...textStyle },

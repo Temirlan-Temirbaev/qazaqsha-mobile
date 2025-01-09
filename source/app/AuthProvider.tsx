@@ -11,6 +11,8 @@ import { useCheckAuth } from "../shared/api/auth/check-auth";
 import {deleteFromStore} from "@/source/shared/utils/deleteFromStore";
 import {receiveFromStore} from "@/source/shared/utils/receiveFromStore";
 import {User} from "@/source/core/entities";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {Platform} from "react-native";
 
 type IAuthContext = {
   user : User | undefined,
@@ -31,10 +33,21 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const navigation = useNavigation();
   const router = useRouter();
   const isAuth = !!(
-    navigation?.getState()?.routes[0].name === "index" || "registration"
+    navigation?.getState()?.routes[0].name === "index" || navigation?.getState()?.routes[0].name === "registration"
   );
   const getToken = async () => {
     const receivedToken = await receiveFromStore("qazaqsha-token");
+    console.log("Token received:", receivedToken);
+    
+    const isCurrentAuthRoute =
+      navigation?.getState()?.routes[0].name === "index" || 
+      navigation?.getState()?.routes[0].name === "registration";
+    
+    if (!receivedToken && !isCurrentAuthRoute) {
+      logout();
+      return;
+    }
+    
     setToken(receivedToken as string);
   };
 
@@ -45,21 +58,30 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const logout = async () => {
     setToken("");
     await deleteFromStore("qazaqsha-token");
-    await Updates.reloadAsync();
+    if (Platform.OS === "web") {
+      window.location.reload();
+    } else {
+      await Updates.reloadAsync();
+    }
     router.push("/");
   };
 
   const { userData, refetch, isLoading } = useCheckAuth(!isAuth, token);
+  
   useEffect(() => {
     if (token) refetch();
-  }, [token]);
+  }, [token, refetch]);
+
   useEffect(() => {
-    if (userData && isAuth) {
+    console.log(userData, isAuth, token);
+    console.log(navigation.getState()?.routes[0].name);
+    if (userData) {
       if (userData.courses.length === 0) {
         return router.push("/auth/start_test")
       }
-      router.push("/auth");
+      if (!navigation?.getState()?.routes[0].name.includes("/auth")) return router.push("/auth");
     }
+    // if (!userData && !token && !isAuth) router.push("/")
   }, [userData, isAuth, token]);
 
   // if ((isLoading || !userData) && !isAuth) return <Loading />;

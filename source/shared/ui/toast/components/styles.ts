@@ -52,8 +52,10 @@ const styles = StyleSheet.create({
   },
 
   textStyle: {
-    fontSize: RFPercentage(2.5),
+    fontSize: 20,
     fontWeight: "400",
+    marginLeft: 10,
+    fontFamily: "IBMPlexSans-Regular",
   },
 });
 

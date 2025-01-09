@@ -1,8 +1,8 @@
 import { finishIcon } from "@/assets/icons/finish";
-import { Reply, StartTest } from "@/source/core/entities";
+import { Reply, StartTest, Test } from "@/source/core/entities";
 import { client } from "@/source/shared/utils/apiClient";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, {useContext, useEffect, useState} from "react";
 import { View, Text, TouchableOpacity, FlatList, StyleSheet, Image, Modal, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -19,48 +19,23 @@ type StudentAnswer = {
 }
 
 const TestScreen = () => {
+  const local : {id : string}= useLocalSearchParams()
   const {data: testData} = useQuery({
-    queryKey : ["getStartTest"],
+    queryKey : [`get-assignment-${local.id}`],
     queryFn: () => {
-      return client.get<StartTest>("assignment/start-test").then(r => r.data)
+      return client.get<Test>(`full-test/${local.id}`).then(r => r.data)
     }
   })
   const {t} = useContext(LanguageContext)
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({});
-  const [isCompleted, setIsCompleted] = useState(false);
-  const [reply, setReply] = useState<Reply | null>(null)
   const [modalVisible, setModalVisible] = useState(false);
-
-  const {mutate} = useMutation({
-    mutationKey: ["replyStartTest"],
-    mutationFn : () => {
-      const studentAnswers : StudentAnswer[] = []
-      Object.keys(selectedAnswers).forEach(key => {
-        studentAnswers.push({questionId: key, answerId: selectedAnswers[key]})
-      })
-      return client.post<Reply>("reply", {
-        type : "start_test",
-        assignmentId: testData?.assignment_id,
-        studentAnswers
-      })
-    },
-    onSuccess : (r) => {
-      setReply(r.data)
-      setIsCompleted(true)
-    },
-    onError: (e) => {
-      console.log(e);
-      
-    }
-  })
 
   useEffect(() => {
     const loadAnswers = async () => {
       try {
-
         const savedAnswers = await receiveFromStore(`assignment-${testData?.assignment_id}`);
-        
+    
         if (savedAnswers) {
           setSelectedAnswers(JSON.parse(savedAnswers));
         }
@@ -72,33 +47,15 @@ const TestScreen = () => {
     loadAnswers();
   }, [testData]);
 
-  useEffect(() => {
-    const saveAnswers = async () => {
-      try {        
-        await saveToStore(`assignment-${testData?.assignment_id}`, JSON.stringify(selectedAnswers));
-      } catch (error) {
-        console.error("Failed to save answers to storage:", error);
-      }
-    };
-
-    saveAnswers();
-  }, [selectedAnswers]);
-
 
   if (!testData) return;
 
-  const handleAnswerSelect = (questionId: string, answerId: string) => {
-    setSelectedAnswers((prev) => ({
-      ...prev,
-      [questionId]: answerId,
-    }));
-  };
 
   const handleNext = () => {
     if (currentQuestionIndex < testData.questions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
     } else {
-      mutate()
+      router.push("/auth")
     }
   };
 
@@ -129,6 +86,16 @@ const TestScreen = () => {
               isActive = true;
               bgColor = "rgba(108, 56, 204, .15)"
               textColor = "rgb(108, 56, 204)"
+            }
+            const correctAnswer = item.answers.find(answ => answ.is_correct)
+            if (correctAnswer?.answer_id === selectedAnswers[item.question_id]) {
+              isActive = true;
+              bgColor = "#42BF77"
+              textColor = "#fff"
+            } else {
+              isActive = true;
+              bgColor = "#EB5555"
+              textColor = "#fff"
             }
             return <TouchableOpacity 
             onPress={() => setCurrentQuestionIndex(index)}
@@ -189,13 +156,25 @@ const TestScreen = () => {
           scrollEnabled={true}
           data={question.answers}
           keyExtractor={(item) => item.answer_id}
-          renderItem={({ item }) => (
-            <TouchableOpacity
+          renderItem={({ item }) => {
+            const correctAnswer = question.answers.find(answ => answ.is_correct)
+            const isCorrect = correctAnswer?.answer_id === item.answer_id
+            let bg = "#FFF"
+            if (item.answer_id === selectedAnswers[question.question_id]) {
+              if (correctAnswer?.answer_id !== selectedAnswers[question.question_id]) {
+                  bg = "#EB55551A"
+              }
+            }
+            return <TouchableOpacity
               style={[
                 styles.answerButton,
                 selectedAnswers[question.question_id] === item.answer_id && styles.selectedAnswer,
+                {
+                  borderColor : isCorrect ? "#42BF77" : "#DADCE0",
+                  backgroundColor : bg
+                }
               ]}
-              onPress={() => handleAnswerSelect(question.question_id, item.answer_id)}
+              disabled
             >
               <View style={{
                 height: 24, width: 24,
@@ -211,78 +190,8 @@ const TestScreen = () => {
               </View>
               <Text style={styles.answerText}>{item.text}</Text>
             </TouchableOpacity>
-          )}
+          }}
         />
-      </View>
-    );
-  };
-
-  const renderCompletionScreen = () => {
-    if (!reply) return null;
-  
-    return (
-      <View style={styles.completionContainer}>
-        <View style={styles.completionContent}>
-          <View
-            style={{
-              backgroundColor: "#F3F3F3",
-              height: 100,
-              padding: 20,
-              borderRadius: 12,
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ fontFamily: "IBMPlexSans-Bold", fontSize: 22, marginRight : 10 }}>
-              {t("completed")}
-            </Text>
-            <SvgXml xml={finishIcon} width="56px" height="56px" />
-          </View>
-          <Text
-            style={{
-              color: "#868688",
-              fontFamily: "IBMPlexSans-Regular",
-              fontSize: 16,
-              marginTop: 25,
-              marginBottom: 10,
-            }}
-          >
-            {t("yourResult")}
-          </Text>
-          <Text
-            style={{
-              fontFamily: "IBMPlexSans-Bold",
-              fontSize: 24,
-              color: "#6c38cc",
-              marginBottom : 30
-            }}
-          >
-            {reply.score}/{testData.points} {t("points")}
-          </Text>
-          
-          <TouchableOpacity
-            onPress={() => router.push("/auth")}
-            style={{
-              height: 56,
-              backgroundColor: "#151324",
-              borderRadius: 8,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Text
-              style={{
-                fontFamily: "IBMPlexSans-Regular",
-                fontSize: 18,
-                color: "#FFF",
-              }}
-            >
-              {t("mainPage")}
-            </Text>
-          </TouchableOpacity>
-        </View>
       </View>
     );
   };
@@ -293,13 +202,13 @@ const TestScreen = () => {
         minWidth : Platform.OS === "web" ? "85%" : "100%",
         marginHorizontal : Platform.OS === "web" ? "auto" : 0
       }}>
-        
+
       <View style={{display : "flex", flexDirection: "row", justifyContent: "space-between"}}>
         <Text style={styles.title}>{testData.title}</Text>
         <TouchableOpacity 
-        onPress={() => mutate()}
+        onPress={() => router.push("/auth")}
         style={{
-          display: isCompleted ? "none" : "flex",
+          display: "flex",
           backgroundColor : "#6c38cc", 
           justifyContent: "center", 
           alignItems: "center",
@@ -311,12 +220,13 @@ const TestScreen = () => {
 }}>{t("finishTest")}</Text>
         </TouchableOpacity>
       </View>
-      {!isCompleted ? renderQuestion() : renderCompletionScreen()}
+      {renderQuestion()}
       <View style={{
-        flexDirection: Platform.OS === "web" ? "row" :"column-reverse",
+        // flexDirection: "column-reverse",
         gap: 20,
         marginTop: 20,
-        display: isCompleted ? "none" : "flex",
+        display: "flex",
+        flexDirection: Platform.OS === "web" ? "row" :"column-reverse",
         justifyContent : Platform.OS === "web" ? "space-between" : "center"
       }}>
         <TouchableOpacity
@@ -349,7 +259,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: "#f8f9fa",
   },
   title: {
     fontSize: 16,
@@ -398,7 +308,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     textAlign: "center",
-    fontFamily: "IBMPlexSans-Bold",
+    fontFamily: "IBMPlexSans-Bold"
   },
   disabledButton: {
     backgroundColor: "#F7F7F7",
@@ -411,17 +321,6 @@ const styles = StyleSheet.create({
   },
   completionContainer: {
     flex: 1,
-    justifyContent: "flex-start",
-    alignItems: Platform.OS === "web" ? "center" : "flex-start",
-    padding: 20,
-    backgroundColor: "#fff",
-  },
-  completionContent: {
-    maxWidth: Platform.OS === "web" ? 550 : "100%",
-    width: "100%",
-    // alignItems: Platform.OS === "web" ? "center" : "stretch",
-    // justifyContent: "center",
-    // flex : 1
   },
   thumbnail: {
     minWidth: 320,

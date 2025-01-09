@@ -1,0 +1,106 @@
+{
+  "login": "Логин",
+  "enterLogin": "Введите логин...",
+  "password": "Пароль",
+  "enterPassword": "Введите пароль...",
+  "fullName": "Полное имя",
+  "enterFullName": "Введите полное имя...",
+  "email": "Почта",
+  "enterEmail": "example@mail.com",
+  "phone": "Телефон",
+  "enterPhone": "Введите номер...",
+  "sex": "Пол",
+  "male": "Мужской",
+  "female": "Женский",
+  "nationality": "Национальность",
+  "kazakh": "Казах",
+  "russian": "Русский",
+  "uyghur": "Уйгур",
+  "uzbek": "Узбек",
+  "kyrgyz": "Кыргыз",
+  "ukrainian": "Украинец",
+  "belarusian": "Беларус",
+  "otherNationality": "Другая национальность",
+  "age": "Возраст",
+  "enterAge": "Введите возраст...",
+  "register": "Зарегистрироваться",
+  "alreadyHaveAccount": "Уже есть аккаунт?",
+  "loginHere": "Войти",
+  "loginButton": "Войти",
+  "loginError": "Ошибка, Не удалось войти. Проверьте данные.",
+  "noAccount": "Еще нет аккаунта?",
+  "registerHere": "Зарегистрироваться",
+  "question": "Вопрос",
+  "answers": "Варианты ответов",
+  "completed": "Вы завершили тестирование",
+  "yourResult": "Ваш результат",
+  "points": "баллов",
+  "mainPage": "На главную",
+  "finishTest": "Завершить тест",
+  "workOnMistakes" : "Работа над ошибками",
+  "next": "Следующий",
+  "previous": "Назад",
+  "home": {
+    "title": "Главная",
+    "label": "Главная"
+  },
+  "profile": {
+    "title": "Профиль",
+    "label": "Профиль"
+  },
+  "level": "Уровень",
+  "progress": "Прогресс",
+  "lessons": "уроков",
+  "tests": "тестов",
+  "access": {
+    "granted": "Перейти",
+    "denied": "Нет доступа"
+  },
+  "course": {
+    "level": "Уровень",
+    "progress": "Прогресс",
+    "lessons": "{{count}} уроков",
+    "tests": "{{count}} тестов",
+    "lesson": "Урок {{index}}",
+    "test": "Тест {{index}}",
+    "startLesson": "Пройти урок",
+    "startTest": "Пройти тест",
+    "tabs": {
+      "lessons": "Теория",
+      "tests": "Практика"
+    },
+    "levelsDescriptions": {
+      "A1": "Легкий",
+      "A2": "Средний",
+      "B1": "Выше среднего",
+      "B2": "Сложный"
+    }
+  },
+  "edit-password": {
+    "oldPassword": "Старый пароль",
+    "newPassword": "Новый пароль",
+    "confirmPassword": "Подтвердите новый пароль",
+    "required": "Поле обязательно для заполнения",
+    "minLength": "Минимум 4 символа",
+    "save": "Сохранить изменения",
+    "passwordsMismatch": "Пароли не совпадают",
+    "success": "Пароль успешно изменён",
+    "error": "Ошибка изменения пароля. Проверьте данные.",
+    "changePassword" : "Изменить пароль"
+  },
+  "edit-profile": {
+    "phone": "Номер телефона",
+    "mail": "Почта",
+    "age": "Возраст",
+    "saveChanges": "Сохранить изменения",
+    "success": "Данные успешно сохранены",
+    "title" : "Редактировать профиль",
+    "invalidPhone" : "Неккоректный телефон",
+    "invalidEmail" : "Неккоректная почта",
+    "required" : "Это обязательное поле",
+    "minLength" : "Минимальное количество символов - 4"
+  },
+  "loginTitle" : "Войти в аккаунт",
+  "logout" : "Выйти из аккаунта"
+
+}

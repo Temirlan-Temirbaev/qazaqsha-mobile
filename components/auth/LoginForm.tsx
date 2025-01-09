@@ -6,9 +6,12 @@ import {saveToStore} from "@/source/shared/utils/saveToStore";
 import {router} from "expo-router";
 import {client} from "@/source/shared/utils/apiClient";
 import {Toast} from "@/source/shared/ui/toast";
+import {LanguageContext} from "@/source/app/LanguageProvider";
 
 export default function LoginForm() {
   const {setToken} = useContext(AuthContext);
+  const { t: translate } = useContext(LanguageContext)
+  const t = (s: string) => translate(s)
   const {register, handleSubmit, setValue, reset, watch, formState: {errors}} = useForm({
     defaultValues: {
       username: '',
@@ -35,46 +38,46 @@ export default function LoginForm() {
   return (
     <View>
       <View style={styles.formGroup}>
-        <Text style={styles.label}>Логин</Text>
+        <Text style={styles.label}>{t("login")}</Text> {/* Перевод заголовка */}
         <TextInput
           style={styles.input}
-          placeholder="Введите логин..."
-          value={watch('username')} // Привязка значения
-          onChangeText={(value) => setValue('username', value, {shouldValidate: true})}
+          placeholder={t("enterLogin")}
+          value={watch('username')}
+          onChangeText={(value) => setValue('username', value, { shouldValidate: true })}
           {...register('username', {
-            required: 'Логин обязателен.',
+            required: t('edit-profile.required'),
             minLength: {
               value: 4,
-              message: 'Логин должен быть не менее 4 символов.',
+              message: t('edit-profile.minLength'),
             },
           })}
         />
         {errors.username && <Text style={styles.error}>{errors.username.message}</Text>}
       </View>
       <View style={styles.formGroup}>
-        <Text style={styles.label}>Пароль</Text>
+        <Text style={styles.label}>{t("password")}</Text> {/* Перевод заголовка */}
         <TextInput
           style={styles.input}
           placeholder="********"
           secureTextEntry
           value={watch('password')} // Привязка значения
-          onChangeText={(value) => setValue('password', value, {shouldValidate: true})}
+          onChangeText={(value) => setValue('password', value, { shouldValidate: true })}
           {...register('password', {
-            required: 'Пароль обязателен.',
+            required: t('edit-profile.required'),
             minLength: {
               value: 4,
-              message: 'Пароль должен быть не менее 4 символов.',
+              message: t('edit-profile.minLength'),
             },
           })}
         />
         {errors.password && <Text style={styles.error}>{errors.password.message}</Text>}
       </View>
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit(onSubmit)}>
-        <Text style={styles.submitText}>Войти</Text>
+        <Text style={styles.submitText}>{t("loginButton")}</Text> {/* Перевод кнопки */}
       </TouchableOpacity>
-      <Text style={styles.dontHaveAnAccount}>Еще нет аккаунта?{' '}
-        <TouchableOpacity onPress={() => router.push("/registration")} style={{display: "flex", alignItems: "center"}}>
-          <Text style={{marginBottom: -4, textDecorationLine: "underline", color: "#6c38cc"}}>Зарегистрироваться</Text>
+      <Text style={styles.dontHaveAnAccount}>{t("noAccount")}{' '}
+        <TouchableOpacity onPress={() => router.push("/registration")} style={{ display: "flex", alignItems: "center" }}>
+          <Text style={{ textDecorationLine: "underline", color: "#6c38cc" , fontFamily : "IBMPlexSans-Regular"}}>{t("registerHere")}</Text> {/* Перевод текста регистрации */}
         </TouchableOpacity>
       </Text>
     </View>

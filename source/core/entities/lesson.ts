@@ -1,5 +1,5 @@
-import { Course } from './course';
-import { Quiz } from './quiz';
+import { Course } from "./course";
+import { Quiz } from "./quiz";
 
 export class Lesson {
   lesson_id: string;
@@ -8,4 +8,6 @@ export class Lesson {
   title: string;
   video: string | null;
   text: string | null;
+  image: string | null;
+  audio: string | null;
 }

@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import {User} from "@/source/core/entities";
+import { User } from "@/source/core/entities";
 const API_URL = "http://MacBook-Air-Erlan.local:3001/api/";
 
 export const useCheckAuth = (refetchEnabled: boolean, token: string) => {
@@ -8,6 +8,7 @@ export const useCheckAuth = (refetchEnabled: boolean, token: string) => {
   const { data, error, isLoading, refetch } = useQuery({
     queryKey: ["check-auth"],
     queryFn: async () => {
+      if (!token) return;
       axios.defaults.headers.common.Authorization = `Bearer ${token}`;
       const user = await axios
         .get<User>(`${API_URL}user/check-login`, {
@@ -16,6 +17,8 @@ export const useCheckAuth = (refetchEnabled: boolean, token: string) => {
           },
         })
         .catch(async (e: any) => {
+          console.log(e);
+
           if (e?.response?.status === 401) {
             queryClient.cancelQueries({ queryKey: ["check-auth"] });
           }

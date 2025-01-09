@@ -1,11 +1,12 @@
-import { useFonts } from "expo-font";
+import {useFonts} from "expo-font";
 import {SplashScreen, Stack} from "expo-router";
 import QueryProvider from "@/source/app/QueryProvider";
 import {AuthProvider} from "@/source/app/AuthProvider";
 import ToastManager from "@/source/shared/ui/toast/components/ToastManager";
 import {StyleSheet} from "react-native";
-import { useCallback } from "react";
-import { setCustomText } from 'react-native-global-props';
+import {useCallback} from "react";
+import {setCustomText} from 'react-native-global-props';
+import {LanguageProvider} from "@/source/app/LanguageProvider";
 
 export default function Layout() {
 
@@ -28,9 +29,9 @@ export default function Layout() {
   }
 
   if (fontsLoaded) {
-    
+
     setCustomText({
-      style : {
+      style: {
         fontFamily: "I"
       }
     })
@@ -38,12 +39,14 @@ export default function Layout() {
 
   return <QueryProvider>
     <AuthProvider>
-      <ToastManager
-        position="bottom"
-        animationInTiming={300}
-        style={styles.toast}
-      />
-      <Stack screenOptions={{headerShown: false}}/>
+      <LanguageProvider>
+        <ToastManager
+          position="bottom"
+          animationInTiming={300}
+          style={styles.toast}
+        />
+        <Stack screenOptions={{headerShown: false}}/>
+      </LanguageProvider>
     </AuthProvider>
 
   </QueryProvider>

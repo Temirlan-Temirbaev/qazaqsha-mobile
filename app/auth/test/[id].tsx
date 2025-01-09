@@ -1,8 +1,8 @@
 import { finishIcon } from "@/assets/icons/finish";
-import { Reply, StartTest } from "@/source/core/entities";
+import { Reply, StartTest, Test } from "@/source/core/entities";
 import { client } from "@/source/shared/utils/apiClient";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, {useContext, useEffect, useState} from "react";
 import { View, Text, TouchableOpacity, FlatList, StyleSheet, Image, Modal, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -19,28 +19,28 @@ type StudentAnswer = {
 }
 
 const TestScreen = () => {
+  const local : {id : string}= useLocalSearchParams()
   const {data: testData} = useQuery({
-    queryKey : ["getStartTest"],
+    queryKey : [`get-assignment-${local.id}`],
     queryFn: () => {
-      return client.get<StartTest>("assignment/start-test").then(r => r.data)
+      return client.get<Test>(`full-test/${local.id}`).then(r => r.data)
     }
   })
-  const {t} = useContext(LanguageContext)
+  const [modalVisible, setModalVisible] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({});
   const [isCompleted, setIsCompleted] = useState(false);
   const [reply, setReply] = useState<Reply | null>(null)
-  const [modalVisible, setModalVisible] = useState(false);
-
+  const {t} = useContext(LanguageContext)
   const {mutate} = useMutation({
-    mutationKey: ["replyStartTest"],
+    mutationKey: [`reply-${local.id}`],
     mutationFn : () => {
       const studentAnswers : StudentAnswer[] = []
       Object.keys(selectedAnswers).forEach(key => {
         studentAnswers.push({questionId: key, answerId: selectedAnswers[key]})
       })
       return client.post<Reply>("reply", {
-        type : "start_test",
+        type : "tests",
         assignmentId: testData?.assignment_id,
         studentAnswers
       })
@@ -159,6 +159,7 @@ const TestScreen = () => {
         }}>
           {t("question")} {currentQuestionIndex + 1}
         </Text>
+        
         {question?.image && (
           <>
             <TouchableOpacity onPress={() => setModalVisible(true)}>
@@ -209,7 +210,9 @@ const TestScreen = () => {
               }}>
                 {selectedAnswers[question.question_id] === item.answer_id && <MaterialIcons name="done" size={16} color="white" />}
               </View>
-              <Text style={styles.answerText}>{item.text}</Text>
+              <Text style={styles.answerText}>
+                {item.text}
+              </Text>
             </TouchableOpacity>
           )}
         />
@@ -255,12 +258,32 @@ const TestScreen = () => {
               fontFamily: "IBMPlexSans-Bold",
               fontSize: 24,
               color: "#6c38cc",
-              marginBottom : 30
             }}
           >
             {reply.score}/{testData.points} {t("points")}
           </Text>
-          
+          <TouchableOpacity
+            onPress={() => router.push(`/auth/work-on-mistakes/${local.id}`)}
+            style={{
+              height: 56,
+              backgroundColor: "#6c38cc",
+              borderRadius: 8,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              marginVertical: 25,
+            }}
+          >
+            <Text
+              style={{
+                fontFamily: "IBMPlexSans-Regular",
+                fontSize: 18,
+                color: "#FFF",
+              }}
+            >
+              {t("workOnMistakes")}
+            </Text>
+          </TouchableOpacity>
           <TouchableOpacity
             onPress={() => router.push("/auth")}
             style={{
@@ -293,8 +316,8 @@ const TestScreen = () => {
         minWidth : Platform.OS === "web" ? "85%" : "100%",
         marginHorizontal : Platform.OS === "web" ? "auto" : 0
       }}>
-        
-      <View style={{display : "flex", flexDirection: "row", justifyContent: "space-between"}}>
+
+      <View style={{display : "flex", flexDirection: "row", justifyContent: "space-between", }}>
         <Text style={styles.title}>{testData.title}</Text>
         <TouchableOpacity 
         onPress={() => mutate()}
@@ -350,6 +373,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: "#fff",
+    
   },
   title: {
     fontSize: 16,
@@ -373,7 +397,7 @@ const styles = StyleSheet.create({
     display :"flex",
     flexDirection: "row",
     alignItems: "center",
-    gap: 16
+    gap: 16,
   },
   selectedAnswer: {
     backgroundColor: "#d1e7dd",
@@ -389,7 +413,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   navButton: {
-    padding: 15,
+    paddingVertical: 15,
     borderRadius: 5,
     backgroundColor: "#6c38cc",
     paddingHorizontal : Platform.OS === "web" ? 35 : 15
@@ -398,7 +422,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     textAlign: "center",
-    fontFamily: "IBMPlexSans-Bold",
+    fontFamily: "IBMPlexSans-Bold"
   },
   disabledButton: {
     backgroundColor: "#F7F7F7",
